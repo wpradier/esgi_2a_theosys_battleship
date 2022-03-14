@@ -1,5 +1,5 @@
-#include  "battleshipServer.h"
-#define ADDRESS "192.168.0.145"
+#include "protoserv.h"
+#define ADDRESS "127.0.0.1"
 #define PORT 12345
 #define NBCLI 3
 
