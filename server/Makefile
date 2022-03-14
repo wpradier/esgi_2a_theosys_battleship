@@ -1,10 +1,11 @@
-NAME = battleshipServer
+NAME = servjeu
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
+LDFLAGS =
 
 INCLUDES = includes
 
-SRCS = srcs/main.c
+SRCS = srcs/main.c		\
 
 OBJS = $(SRCS:.c=.o)
 
@@ -12,8 +13,12 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME):
-	$(CC) $(CFLAGS) $(SRCS) -I $(INCLUDES) -o $(NAME)
+
+$(NAME): $(OBJS)
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c
+	$(CC) -o $@ -c $< -I $(INCLUDES) $(CFLAGS)
 
 clean:
 	rm -f $(OBJS)
