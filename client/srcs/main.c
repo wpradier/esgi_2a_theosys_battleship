@@ -3,33 +3,44 @@
 #define ADDRESS "192.168.0.145"
 #define PORT 	12345
 
+//int 			main(int argc, char **argv){
 int 			main(){
-	int 		sd,retrecv;	
-	char 		essai[39];
-	s_sockaddr_in 	dest_addr;
+	int 		id, choice;
+	short		programLoop = 1;	
+	char 		msg[100];	
 
-	if((sd = socket(AF_INET, SOCK_STREAM, 0)) == 1){
-		perror("\n Erreur socket : "); 
-		exit(EXIT_FAILURE);
+	id = screate();
+
+	while(programLoop){
+		printf("=====MENU=====\n1: Connexion au serveur\n2: Ecrire sur la mémoire\n3: Lire la mémoire\n0: Quitter\n");
+ 		printf("Que voulez vous faire ?   ");
+ 		scanf("%d", &choice);
+
+                switch(choice){
+			case 0: 
+				return EXIT_SUCCESS; 
+				break;
+			case 1:
+				srvConnect();
+				printf("connect...\n");
+				break;
+
+			case 2: 
+				printf("Message: ");
+                       		scanf("%s",msg);
+                        	swrite(id, msg);
+                        	break;
+			case 3:
+				sread(id);
+				break;
+			default:
+				printf("Invalide input\n");
+                }
+
+		choice = 0;
+
 	}
 
-	dest_addr.sin_family = AF_INET;
-	dest_addr.sin_port = htons(PORT);
-	dest_addr.sin_addr.s_addr = inet_addr(ADDRESS);
-	bzero(&(dest_addr.sin_zero),8);
-	if((connect(sd,(struct sockaddr * )&dest_addr, sizeof(struct sockaddr))) == -1){
-		perror("\n Error connect : ");
-		exit(2);
-	}
-
-	retrecv = recv(sd, essai, 39, 0);
-	if(retrecv == -1){
-		perror("\n Error recv : ");
-		exit(3);
-	}
-
-	
-	printf("\n%s\n",essai);
-	exit(4);
+	return EXIT_SUCCESS;
 
 }

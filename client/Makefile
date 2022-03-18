@@ -5,8 +5,11 @@ LDFLAGS =
 
 INCLUDES = includes
 
-SRCS = srcs/main.c		\
-
+SRCS = 	srcs/main.c		\
+	srcs/shm/read.c		\
+	srcs/shm/write.c	\
+	srcs/shm/create.c	\
+	srcs/srv/connect.c	\
 
 OBJS = $(SRCS:.c=.o)
 
