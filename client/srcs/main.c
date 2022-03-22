@@ -1,35 +1,19 @@
 #include "battleshipClient.h"
 
-#define ADDRESS "192.168.0.145"
+#define ADDRESS "127.0.0.1"
 #define PORT 	12345
+#define BUFF_SIZE	500
 
 int 			main(){
-	int 		sd,retrecv;	
-	char 		essai[39];
-	s_sockaddr_in 	dest_addr;
+	int 		sd;
 
-	if((sd = socket(AF_INET, SOCK_STREAM, 0)) == 1){
-		perror("\n Erreur socket : "); 
-		exit(EXIT_FAILURE);
+	if (!(sd = connect_to_battleship())) {
+		return (EXIT_FAILURE);
 	}
 
-	dest_addr.sin_family = AF_INET;
-	dest_addr.sin_port = htons(PORT);
-	dest_addr.sin_addr.s_addr = inet_addr(ADDRESS);
-	bzero(&(dest_addr.sin_zero),8);
-	if((connect(sd,(struct sockaddr * )&dest_addr, sizeof(struct sockaddr))) == -1){
-		perror("\n Error connect : ");
-		exit(2);
+	if (!client_loop(sd)) {
+		return (EXIT_FAILURE);
 	}
 
-	retrecv = recv(sd, essai, 39, 0);
-	if(retrecv == -1){
-		perror("\n Error recv : ");
-		exit(3);
-	}
-
-	
-	printf("\n%s\n",essai);
-	exit(4);
-
+	return (EXIT_SUCCESS);
 }
