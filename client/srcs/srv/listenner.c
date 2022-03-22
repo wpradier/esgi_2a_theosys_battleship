@@ -1,14 +1,15 @@
 #include "battleshipClient.h"
 
-#define ADDRESS "192.168.0.145"
+#define ADDRESS "192.168.64.144"
 #define PORT 	12345
 
-int		srvConnect(){
-	int	sd, retrecv;
+int		srvListenner(int id){
+	int	sd;
+	int	retrecv;
+	//int 	id;
 	char 	message[39];
 	char 	messageBuffer[39];
-	//char	*pt;
-	short loop = 1;
+	short 	loop = 1;
 
         s_sockaddr_in   dest_addr;
 
@@ -34,7 +35,7 @@ int		srvConnect(){
                		return EXIT_FAILURE;
         	} else if(message != messageBuffer){
 			swrite(id, message);	
-			messageBuffer = message;		
+			strcpy(messageBuffer, message);		
 		}
 	}
 

@@ -10,6 +10,9 @@ SRCS = 	srcs/main.c		\
 	srcs/shm/write.c	\
 	srcs/shm/create.c	\
 	srcs/srv/connect.c	\
+	srcs/srv/listenner.c	\
+	srcs/srv/sender.c	\
+
 
 OBJS = $(SRCS:.c=.o)
 

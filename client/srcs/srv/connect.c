@@ -1,6 +1,6 @@
 #include "battleshipClient.h"
 
-#define ADDRESS "192.168.0.145"
+#define ADDRESS "192.168.64.144"
 #define PORT 	12345
 
 int		srvConnect(){

@@ -18,6 +18,9 @@ int	sread(int id);
 int     swrite(int id, char buffer[100]);
 int	screate();
 int 	srvConnect();
+int 	srvSender(char	*message);
+int	srvListenner(int id);
+
 
 
 #endif
