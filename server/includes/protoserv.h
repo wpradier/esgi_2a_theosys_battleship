@@ -41,6 +41,14 @@ typedef struct Credentials {
 	int		quantity_id;
 } s_credentials;
 
+
+typedef struct  Board {
+	int     shm_id;
+        int     width;
+        int     height;
+} s_board;
+
+
 int		create_socket();
 int		comserv();
 int		serv_send(int ns, char *proto, char *msg);
@@ -48,5 +56,8 @@ int		login_i(int i);
 int		password_i(int i);
 int		add_user(s_credentials credentials, char *login, char *password);
 int		login_user(s_credentials credentials, char *login, char *password);
+int		show_boards(s_board board);
+int		strike(s_board board, int x, int y);
+char		*get_board(s_board board);
 
 #endif
