@@ -56,7 +56,6 @@ int		login_i(int i);
 int		password_i(int i);
 int		add_user(s_credentials credentials, char *login, char *password);
 int		login_user(s_credentials credentials, char *login, char *password);
-int		show_boards(s_board board);
 int		strike(s_board board, int x, int y);
 char		*get_board(s_board board);
 
