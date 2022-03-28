@@ -2,62 +2,44 @@
 
 int	handle_son(int ns, s_credentials credentials);
 
-s_credentials		empty_credentials() {
-	s_credentials	credentials;
+int			connect_admin() {
+	char		u_login[MSG_SIZE];
+	char		u_password[MSG_SIZE];
 
-	credentials.logins_id = 0;
-	credentials.passwords_id = 0;
-	credentials.quantity_id = 0;
 
-	return credentials;
-}
+	printf("En attente de connection de l'admin...\n");
+	ns = accept(sd, (struct sockaddr *)&user_addr, (socklen_t *)&fromlen);
 
-s_credentials		init_credentials_shms(int *error) {
-	s_credentials	credentials;
-	char		*logins;
-	char		*passwords;
-	int		*quantity;
-
-	*error = 0;
-
-	if ((credentials.logins_id = shmget((key_t)LOGINS_SHM_KEY,
-					sizeof(char) * MAX_LOGIN_SIZE * MAX_USERS,
-					IPC_CREAT|0700)) == -1) {
-		*error = 1;
-		perror("Erreur shmget (logins)");
-		return empty_credentials();
+	if (!serv_send(ns, GET_INPUT, "Login:")) {
+		return (-2);
 	}
 
-
-	if ((credentials.passwords_id = shmget((key_t)PASSWORDS_SHM_KEY,
-					sizeof(char) * MAX_PASSWORD_SIZE * MAX_USERS,
-					IPC_CREAT|0700)) == -1) {
-		*error = 1;
-		perror("Erreur shmget (passwords)");
-		return empty_credentials();
+	if (recv(ns, u_login, MSG_SIZE, 0) == -1) {
+		return (-2);
+	}
+	
+	if (!serv_send(ns, GET_INPUT, "Password:")) {
+		return (-2);
 	}
 
-	if ((credentials.quantity_id = shmget((key_t)QUANTITY_SHM_KEY,
-					sizeof(int),
-					IPC_CREAT|0700)) == -1) {
-		*error = 1;
-		perror("Erreur shmget (quantity)");
-		return empty_credentials();
+	if (recv(ns, u_password, MSG_SIZE, 0) == -1) {
+		return (-2);
 	}
 
-	logins = shmat(credentials.logins_id, 0, IPC_NOWAIT);
-	passwords = shmat(credentials.passwords_id, 0, IPC_NOWAIT);
-	quantity = shmat(credentials.quantity_id, 0, IPC_NOWAIT);
+	if (!strncmp(u_login, "admin", MAX_LOGIN_SIZE)
+			&& !strncmp(u_password, "admin", MAX_PASSWORD_SIZE)) {
+		if (!serv_send(ns, INFO, "Welcome, admin.")) {
+			return (-2);
+		}
 
-	bzero(logins, sizeof(char) * MAX_LOGIN_SIZE * MAX_USERS);
-	bzero(passwords, sizeof(char) * MAX_PASSWORD_SIZE * MAX_USERS);
-	*quantity = 0;
+		return (ns);
+	}
 
-	shmdt(logins);
-	shmdt(passwords);
-	shmdt(quantity);
+	if (!serv_send(ns, STOP_CONNECTION, "Wrong credentials.")) {
+		return (-2);
+	}
 
-	return (credentials);
+	return (-1);
 }
 
 int			comserv() {
@@ -65,10 +47,12 @@ int			comserv() {
 	int		ns;
 	int		fromlen;
 	int		retfork;
-	int		error;
+	int		ad_pipe[2];
+	int		u_pipes[MAX_USERS][2];
 	short		start_game;
 	s_sockaddr_in	user_addr;
-	s_credentials	credentials;
+	s_users		*users;
+	s_board		board;
 
 
 
@@ -76,17 +60,32 @@ int			comserv() {
 		return (0);
 	}
 
-	credentials = init_credentials_shms(&error);
-	if (error) {
+
+	ns = -1;
+	while (ns < 0) {
+		ns = connect_admin();
+		
+		if (ns == -2) { // error
+			return (0);
+		}
+	}
+
+
+	users = init_users();
+	
+	pipe(ad_pipe);
+	retfork = fork();
+
+	if (retfork == -1) {
+		free_users(users);
 		return (0);
 	}
 
-	
-	printf("logins shm id: %d\n", credentials.logins_id);
-	printf("passwords shm id: %d\n", credentials.passwords_id);
-	printf("quantity shm id: %d\n", credentials.quantity_id);
+	if (retfork == 0) {
+		initial_admin_menu(ns, users, ad_pipe[1]);
+	}
 
-	add_user(credentials, "admin", "admin");
+	board = admin_phase(ad_pipe[0]);
 
 	start_game = 0;
 	while (1) {
@@ -95,11 +94,17 @@ int			comserv() {
 
 		if (ns == -1) {
 			perror("Erreur accept\n");
+			free_users(users);
 			return (0);
 		}
 
 		printf("CREATION FILS\n");
 		retfork = fork();
+
+		if (retfork == -1) {
+			free_users(users);
+			return (0);
+		}
 
 		if (retfork == 0) {
 			handle_son(ns, credentials);

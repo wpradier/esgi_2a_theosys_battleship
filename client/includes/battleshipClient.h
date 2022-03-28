@@ -10,7 +10,7 @@
 # include <unistd.h>
 # include <arpa/inet.h>
 
-# define MSG_SIZE 1024
+# define MSG_SIZE 2048
 
 /*
  * SERVER PROTOCOL

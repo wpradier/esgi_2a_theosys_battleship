@@ -5,13 +5,16 @@ LDFLAGS =
 
 INCLUDES = includes
 
-SRCS = srcs/main.c			\
-       srcs/comserv.c			\
-       srcs/create_socket.c		\
-       srcs/serv_send.c			\
-       srcs/users_funcs/add_user.c	\
-       srcs/users_funcs/login_user.c	\
-       srcs/users_funcs/cred_i.c	\
+SRCS = srcs/main.c				\
+       srcs/comserv.c				\
+       srcs/create_socket.c			\
+       srcs/serv_send.c				\
+       srcs/users_funcs/init_users.c		\
+       srcs/users_funcs/add_user.c		\
+       srcs/users_funcs/free_user.c		\
+       srcs/users_funcs/login_user.c		\
+       srcs/menu_funcs/admin_phase.c		\
+       srcs/menu_funcs/initial_admin_menu.c	\
 
 OBJS = $(SRCS:.c=.o)
 

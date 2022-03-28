@@ -1,5 +1,5 @@
-#ifndef BATTLESHIPSERVER_H
-# define BATTLESHIPSERVER_H
+#ifndef PROTOSERV_H
+# define PROTOSERV_H
 
 # include <stdlib.h>
 # include <unistd.h>
@@ -14,10 +14,8 @@
 # define MAX_USERS 10
 # define MAX_LOGIN_SIZE 30
 # define MAX_PASSWORD_SIZE 30
-# define MSG_SIZE 1024
-# define LOGINS_SHM_KEY 100
-# define PASSWORDS_SHM_KEY 101
-# define QUANTITY_SHM_KEY 102
+# define MSG_SIZE 2048
+# define BOARD_SHM_KEY 101
 
 /*
  * SERVER PROTOCOL
@@ -32,21 +30,42 @@
  * END SERVER PROTOCOL
  */
 
+/*
+ * PIPE COMS PROTOCOL
+ */
+
+# define END_PHASE "00"
+# define BOARD_SIZE "01"
+# define CREDENTIALS "02"
+# define BOAT_COORDS "03"
+
+/*
+ * END PIPE COMS PROTOCOL
+ */
+
 typedef struct sockaddr_in s_sockaddr_in;
 
+typedef struct Users {
+	char	**logins;
+	char	**passwords;
+	size_t	quantity;
+} s_users;
 
-typedef struct Credentials {
-	int		logins_id;
-	int		passwords_id;
-	int		quantity_id;
-} s_credentials;
+typedef struct Board {
+	int	shm_id;
+	int	width;
+	int	height;
+} s_board;
 
 int		create_socket();
 int		comserv();
 int		serv_send(int ns, char *proto, char *msg);
-int		login_i(int i);
-int		password_i(int i);
-int		add_user(s_credentials credentials, char *login, char *password);
-int		login_user(s_credentials credentials, char *login, char *password);
+s_users		*init_users();
+int		add_user(s_users *users, char *login, char *password);
+void		free_users(s_users *users);
+int		login_user(s_users *users, char *login, char *password);
+s_board		admin_phase(int admin_fd, s_users *users);
+int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd);
+
 
 #endif
