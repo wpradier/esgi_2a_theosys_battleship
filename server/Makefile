@@ -7,6 +7,7 @@ INCLUDES = includes
 
 SRCS = srcs/main.c				\
        srcs/comserv.c				\
+       srcs/gestpart.c				\
        srcs/create_socket.c			\
        srcs/serv_send.c				\
        srcs/game/strike.c			\
@@ -16,6 +17,7 @@ SRCS = srcs/main.c				\
        srcs/users_funcs/free_users.c		\
        srcs/users_funcs/login_user.c		\
        srcs/menu_funcs/admin_phase.c		\
+       srcs/menu_funcs/player_menu.c		\
        srcs/menu_funcs/initial_admin_menu.c	\
 
 OBJS = $(SRCS:.c=.o)

@@ -1,6 +1,6 @@
 #include "protoserv.h"
 
-int	handle_son(int ns, s_users *users);
+int	handle_son(int ns, s_users *users, int pipes[2][2], s_board board);
 
 int			connect_admin(int sd) {
 	s_sockaddr_in	user_addr;
@@ -13,6 +13,10 @@ int			connect_admin(int sd) {
 	printf("En attente de connection de l'admin...\n");
 	ns = accept(sd, (struct sockaddr *)&user_addr, (socklen_t *)&fromlen);
 
+	if (ns == -1) {
+		perror("Erreur accept admin");
+		return (-2);
+	}
 	if (!serv_send(ns, GET_INPUT, "Login:")) {
 		return (-2);
 	}
@@ -50,8 +54,9 @@ int			comserv() {
 	int		ns;
 	int		fromlen;
 	int		retfork;
-	int		ad_pipe[2];
-	//int		u_pipes[MAX_USERS][2];
+	int		ad_pipes[2][2];
+	int		u_pipes[MAX_USERS][2][2];
+	size_t		i;
 	s_sockaddr_in	user_addr;
 	s_users		*users;
 	s_board		board;
@@ -74,7 +79,8 @@ int			comserv() {
 
 	users = init_users();
 	
-	pipe(ad_pipe);
+	pipe(ad_pipes[FROMSERV]);
+	pipe(ad_pipes[TOSERV]);
 	retfork = fork();
 
 	if (retfork == -1) {
@@ -83,16 +89,18 @@ int			comserv() {
 	}
 
 	if (retfork == 0) {
-		initial_admin_menu(ns, ad_pipe[1]);
+		initial_admin_menu(ns, ad_pipes[TOSERV][1]);
 		if (!serv_send(ns, INFO, "Admin phase over. Waiting for game to start...\n")) {
 			return (0);
 		}
 		while (1);
 	}
 
-	board = admin_phase(ad_pipe[0], users);
+	board = admin_phase(ad_pipes[TOSERV][0], users);
 
 	printf("---BOARD FINAL---\n%s", get_board(board, 1));
+	
+	i = 0;
 	while (1) {
 		printf("En attente de connection d'un client...\n");
 		ns = accept(sd, (struct sockaddr *)&user_addr, (socklen_t *)&fromlen);
@@ -103,6 +111,9 @@ int			comserv() {
 			return (0);
 		}
 
+		pipe(u_pipes[i][FROMSERV]);
+		pipe(u_pipes[i][TOSERV]);
+
 		printf("CREATION FILS\n");
 		retfork = fork();
 
@@ -112,16 +123,25 @@ int			comserv() {
 		}
 
 		if (retfork == 0) {
-			handle_son(ns, users);
+			handle_son(ns, users, u_pipes[i], board);
 			exit (EXIT_SUCCESS);
 		}
+
+		i++;
+
+		if (i == users->quantity) {
+			break;
+		}
 	}
+
+	printf("---START GAME---\n");
+	gestpart(board, ad_pipes, u_pipes, users);
 
 	return (1);
 } 
 
 
-int			handle_son(int ns, s_users *users) {
+int			handle_son(int ns, s_users *users, int pipes[2][2], s_board board) {
 	char		msg[MSG_SIZE];
 	char		login[MSG_SIZE];
 	char		password[MSG_SIZE];
@@ -162,6 +182,7 @@ int			handle_son(int ns, s_users *users) {
 		return (0);
 	}
 
+	player_menu(ns, pipes, board);
 	if (!serv_send(ns, STOP_CONNECTION, "Nothing left to do.\n")) {
 		return (0);
 	}

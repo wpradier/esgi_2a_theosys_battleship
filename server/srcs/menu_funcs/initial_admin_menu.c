@@ -1,6 +1,6 @@
 #include "protoserv.h"
 
-int		validate_value(char c, char min) {
+int		validate_value_min(char c, char min) {
 	if ((c >= 'a' && c <= 'f') || (c >= min && c <= '9')) {
 		return (1);
 	}
@@ -42,7 +42,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 		w = response[0];
 		h = response[2];
 
-		if (!validate_value(w, '5') || !validate_value(h, '5')) {
+		if (!validate_value_min(w, '5') || !validate_value_min(h, '5')) {
 			strncpy(message, "Invalid values\n", MSG_SIZE);
 			if (!serv_send(admin_ns, INFO, message)) {
 				return (0);
@@ -124,7 +124,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 			x = response[0];
 			y = response[2];
 
-			if (!validate_value(x, '0') || !validate_value(y, '0')) {
+			if (!validate_value_min(x, '0') || !validate_value_min(y, '0')) {
 				if (!serv_send(admin_ns, INFO, "Invalid values\n")) {
 					return (0);
 				}
