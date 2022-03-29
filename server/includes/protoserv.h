@@ -58,9 +58,19 @@ typedef struct Board {
 	int	len;
 } s_board;
 
+
+typedef struct  Board {
+	int     shm_id;
+        int     width;
+        int     height;
+} s_board;
+
+
 int		create_socket();
 int		comserv();
 int		serv_send(int ns, char *proto, char *msg);
+int		strike(s_board board, int x, int y);
+char		*get_board(s_board board);
 s_users		*init_users();
 int		add_user(s_users *users, char *login, char *password);
 void		free_users(s_users *users);
