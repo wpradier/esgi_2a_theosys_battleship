@@ -59,13 +59,6 @@ typedef struct Board {
 } s_board;
 
 
-typedef struct  Board {
-	int     shm_id;
-        int     width;
-        int     height;
-} s_board;
-
-
 int		create_socket();
 int		comserv();
 int		serv_send(int ns, char *proto, char *msg);

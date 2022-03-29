@@ -9,6 +9,8 @@ SRCS = srcs/main.c				\
        srcs/comserv.c				\
        srcs/create_socket.c			\
        srcs/serv_send.c				\
+       srcs/game/strike.c			\
+       srcs/game/get_board.c			\
        srcs/users_funcs/init_users.c		\
        srcs/users_funcs/add_user.c		\
        srcs/users_funcs/free_users.c		\
