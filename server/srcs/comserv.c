@@ -1,8 +1,11 @@
 #include "protoserv.h"
 
-int	handle_son(int ns, s_credentials credentials);
+int	handle_son(int ns, s_users *users);
 
-int			connect_admin() {
+int			connect_admin(int sd) {
+	s_sockaddr_in	user_addr;
+	int		fromlen;
+	int		ns;
 	char		u_login[MSG_SIZE];
 	char		u_password[MSG_SIZE];
 
@@ -48,11 +51,11 @@ int			comserv() {
 	int		fromlen;
 	int		retfork;
 	int		ad_pipe[2];
-	int		u_pipes[MAX_USERS][2];
-	short		start_game;
+	//int		u_pipes[MAX_USERS][2];
 	s_sockaddr_in	user_addr;
 	s_users		*users;
 	s_board		board;
+	char		*boardpt;
 
 
 
@@ -63,7 +66,7 @@ int			comserv() {
 
 	ns = -1;
 	while (ns < 0) {
-		ns = connect_admin();
+		ns = connect_admin(sd);
 		
 		if (ns == -2) { // error
 			return (0);
@@ -82,12 +85,28 @@ int			comserv() {
 	}
 
 	if (retfork == 0) {
-		initial_admin_menu(ns, users, ad_pipe[1]);
+		initial_admin_menu(ns, ad_pipe[1]);
+		if (!serv_send(ns, INFO, "Admin phase over. Waiting for game to start...\n")) {
+			return (0);
+		}
+		while (1);
 	}
 
-	board = admin_phase(ad_pipe[0]);
+	board = admin_phase(ad_pipe[0], users);
 
-	start_game = 0;
+	boardpt = (char*)shmat((key_t)board.shm_id, 0, IPC_NOWAIT);
+	int i = 0;
+	int j;
+	while (i < board.height) {
+		j = 0;
+		while (j < board.width) {
+			printf("%c", boardpt[(i * board.width) + j]);
+			j++;
+		}
+		printf("\n");
+		i++;
+	}
+
 	while (1) {
 		printf("En attente de connection d'un client...\n");
 		ns = accept(sd, (struct sockaddr *)&user_addr, (socklen_t *)&fromlen);
@@ -107,12 +126,8 @@ int			comserv() {
 		}
 
 		if (retfork == 0) {
-			handle_son(ns, credentials);
+			handle_son(ns, users);
 			exit (EXIT_SUCCESS);
-		}
-
-		if (start_game) {
-			break;
 		}
 	}
 
@@ -120,7 +135,7 @@ int			comserv() {
 } 
 
 
-int			handle_son(int ns, s_credentials credentials) {
+int			handle_son(int ns, s_users *users) {
 	char		msg[MSG_SIZE];
 	char		login[MSG_SIZE];
 	char		password[MSG_SIZE];
@@ -146,7 +161,7 @@ int			handle_son(int ns, s_credentials credentials) {
 	printf("password reçu: '%s'\n", password);
 
 
-	ret_login = login_user(credentials, login, password);
+	ret_login = login_user(users, login, password);
 
 	if (!ret_login) {
 		serv_send(ns, STOP_CONNECTION, "Invalid credentials, disconnecting.");
@@ -161,12 +176,8 @@ int			handle_son(int ns, s_credentials credentials) {
 		return (0);
 	}
 
-	if (ret_login == 1) {
-		printf("---ADMIN---\n");
-	}
-
-	if (ret_login == 2) {
-		printf("---PLAYER---\n");
+	if (!serv_send(ns, STOP_CONNECTION, "Nothing left to do.\n")) {
+		return (0);
 	}
 
 	return (1);

@@ -1,33 +1,28 @@
 #include "protoserv.h"
 
-int		parse_value(char c) {
-	if (c >= 'a' && c <= 'f') {
-		return (c - 87); // hex
-	}
-	
-	if (c >= '0' && c <= '9') {
-		return (c - 48);
+int		validate_value(char c, char min) {
+	if ((c >= 'a' && c <= 'f') || (c >= min && c <= '9')) {
+		return (1);
 	}
 
-	return (-1);
+	return (0);
 }
 
-int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd) {
+int		initial_admin_menu(int admin_ns, int serv_fd) {
 	char	message[MSG_SIZE];
 	char	response[MSG_SIZE];
 	char	login[MAX_LOGIN_SIZE];
 	char	password[MAX_PASSWORD_SIZE];
 	char	*sep;
-	int	w;
-	int	h;
-	int	x;
-	int	y;
-	s_board	board;
+	char	w;
+	char	h;
+	char	x;
+	char	y;
 
 
 	while (1) {
 		strncpy(message, "---ADMIN MENU---\n", MSG_SIZE);
-		strncat(message, "Please input board size (<width>:<height>), must have at least 5:5, and at most f:f\n", MSG_SIZE);
+		strncat(message, "Please input board size (<width>:<height>), must have at least 5:5, and at most f:f\n", MSG_SIZE - 1);
 		if (!serv_send(admin_ns, GET_INPUT, message)) {
 			return (0);
 		}
@@ -43,11 +38,12 @@ int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd) {
 			}
 			continue;
 		}
-		w = parse_value(response[0]);
-		h = parse_value(response[2]);
 
-		if (w == -1 || h == -1) {
-			strncpy(message, "Unrecognized values\n", MSG_SIZE);
+		w = response[0];
+		h = response[2];
+
+		if (!validate_value(w, '5') || !validate_value(h, '5')) {
+			strncpy(message, "Invalid values\n", MSG_SIZE);
 			if (!serv_send(admin_ns, INFO, message)) {
 				return (0);
 			}
@@ -57,14 +53,14 @@ int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd) {
 		break;
 	}
 
-	snprintf(message, MSG_SIZE, "01%d%d", w, h); // 01 = board_size
+	snprintf(message, MSG_SIZE, "01%c%c", w, h); // 01 = board_size
 
 	write(serv_fd, message, MSG_SIZE);
 	while (1) {
 		strncpy(message, "---ADMIN MENU---\n", MSG_SIZE);
-		strncat(message, "0: Quit menu and start waiting for players\n");
-		strncat(message, "1: Add player credentials\n");
-		strncat(message, "2: Add boat\n");
+		strncat(message, "0: Quit menu and start waiting for players\n", MSG_SIZE - 1);
+		strncat(message, "1: Add player credentials\n", MSG_SIZE - 1);
+		strncat(message, "2: Add boat\n", MSG_SIZE - 1);
 		if (!serv_send(admin_ns, GET_INPUT, message)) {
 			return (0);
 		}
@@ -117,17 +113,25 @@ int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd) {
 				return (0);
 			}
 
-			x = parse_value(response[0]);
-			y = parse_value(response[2]);
+			if (!(sep = strchr(response, ':'))) {
+				strncpy(message, "Missing ':'\n", MSG_SIZE);
+				if (!serv_send(admin_ns, INFO, message)) {
+					return (0);
+				}
+				continue;
+			}
 
-			if (x == -1 || y == - 1) {
+			x = response[0];
+			y = response[2];
+
+			if (!validate_value(x, '0') || !validate_value(y, '0')) {
 				if (!serv_send(admin_ns, INFO, "Invalid values\n")) {
 					return (0);
 				}
 				continue;
 			}
 
-			snprintf(message, MSG_SIZE, "03%d%d", x, y);
+			snprintf(message, MSG_SIZE, "03%c%c", x, y);
 
 			write(serv_fd, message, MSG_SIZE);
 

@@ -1,3 +1,5 @@
+#include "protoserv.h"
+
 void		free_users(s_users *users) {
 	int	i;
 

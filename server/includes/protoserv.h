@@ -55,6 +55,7 @@ typedef struct Board {
 	int	shm_id;
 	int	width;
 	int	height;
+	int	len;
 } s_board;
 
 int		create_socket();
@@ -65,7 +66,7 @@ int		add_user(s_users *users, char *login, char *password);
 void		free_users(s_users *users);
 int		login_user(s_users *users, char *login, char *password);
 s_board		admin_phase(int admin_fd, s_users *users);
-int		initial_admin_menu(int admin_ns, s_users *users, int serv_fd);
+int		initial_admin_menu(int admin_ns, int serv_fd);
 
 
 #endif
