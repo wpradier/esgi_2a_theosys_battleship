@@ -55,8 +55,6 @@ int			comserv() {
 	s_sockaddr_in	user_addr;
 	s_users		*users;
 	s_board		board;
-	char		*boardpt;
-
 
 
 	if (!(sd = create_socket())) {
@@ -94,19 +92,7 @@ int			comserv() {
 
 	board = admin_phase(ad_pipe[0], users);
 
-	boardpt = (char*)shmat((key_t)board.shm_id, 0, IPC_NOWAIT);
-	int i = 0;
-	int j;
-	while (i < board.height) {
-		j = 0;
-		while (j < board.width) {
-			printf("%c", boardpt[(i * board.width) + j]);
-			j++;
-		}
-		printf("\n");
-		i++;
-	}
-
+	printf("---BOARD FINAL---\n%s", get_board(board, 1));
 	while (1) {
 		printf("En attente de connection d'un client...\n");
 		ns = accept(sd, (struct sockaddr *)&user_addr, (socklen_t *)&fromlen);

@@ -93,6 +93,9 @@ s_board		admin_phase(int admin_fd, s_users *users) {
 			x = parse_value(admin_msg[2]);
 			y = parse_value(admin_msg[3]);
 
+			printf("X: %d\n", x);
+			printf("Y: %d\n", y);
+			printf("i: %d\n", (y * board.width) + x);
 			shmpt[(y * board.width) + x] = 'B';
 			printf("SHM CONTENT:\n");
 			i = 0;
