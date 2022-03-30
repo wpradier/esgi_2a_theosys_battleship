@@ -12,8 +12,9 @@ int		parse_value(char c) {
 	return (-1);
 }
 
-s_board		admin_phase(int admin_fd, s_users *users) {
+s_board		admin_phase(int ad_pipes[2][2], s_users *users) {
 	char	admin_msg[MSG_SIZE];
+	char	buff[MSG_SIZE];
 	char	login[MAX_LOGIN_SIZE];
 	char	password[MAX_PASSWORD_SIZE];
 	char	*shmpt;
@@ -29,7 +30,7 @@ s_board		admin_phase(int admin_fd, s_users *users) {
 	board.len = 0;
 	while (1) {
 		printf("---WAITING FOR ADMIN MSG---\n");
-		read(admin_fd, admin_msg, MSG_SIZE);
+		read(ad_pipes[TOSERV][P_READ], admin_msg, MSG_SIZE);
 		printf("---RECEIVED ADMIN MSG---: %s\n", admin_msg);
 		
 		if (!strncmp(admin_msg, END_PHASE, 2)) {
@@ -48,6 +49,11 @@ s_board		admin_phase(int admin_fd, s_users *users) {
 			board.shm_id = shmget((key_t)BOARD_SHM_KEY,
 					sizeof(char) * board.len,
 					IPC_CREAT|0700);
+
+			/* sending board id to admin */
+			sprintf(buff, "%d", board.shm_id);
+
+			write(ad_pipes[FROMSERV][P_WRITE], buff, MSG_SIZE);
 
 			shmpt = (char*)shmat((key_t)board.shm_id, 0, IPC_NOWAIT);
 			i = 0;

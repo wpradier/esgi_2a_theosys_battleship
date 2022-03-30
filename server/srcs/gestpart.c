@@ -21,17 +21,70 @@ int		detect_endgame(s_board board) {
 	return (!detect_boat);
 }
 
+char		*get_winners(int *points, s_users *users) {
+	int	i;
+	int	q;
+	int	tot;
+	int	max;
+	char	winners[MSG_SIZE];
+	char	*buff;
+
+
+	buff = malloc(sizeof(char) * MSG_SIZE);
+
+	bzero(winners, MSG_SIZE);
+	bzero(buff, MSG_SIZE);
+
+	i = 0;
+	q = users->quantity;
+	max = 0;
+	while (i < q) {
+		if (points[i] > max) {
+			max = points[i];
+		}
+		i++;
+	}
+
+	i = 0;
+	tot = 0;
+	while (i < q) {
+		if (points[i] == max) {
+			if (tot > 0) {
+				strcat(winners, ", ");
+			}
+			strcat(winners, users->logins[i]);
+			
+			tot++;
+		}
+		i++;
+	}
+
+	if (tot >= 2) {
+		strncpy(buff, "Winners: ", MSG_SIZE);
+	} else {
+		strncpy(buff, "Winner: ", MSG_SIZE);
+	}
+
+	strcat(buff, winners);
+	strcat(buff, " !\n");
+
+	return (buff);
+}
+
 void		display_endgame(int *points, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s_users *users) {
 	int	i;
 	int	q;
 	char	buff[MSG_SIZE];
 	char	end[MSG_SIZE];
 	char	score[5];
+	char	*winners;
 
 
 	strncpy(buff, DISPLAY, MSG_SIZE);
-	strncpy(end, END_GAME, MSG_SIZE);
 	strcat(buff, "---END OF GAME---\n");
+
+	strncpy(end, END_GAME, MSG_SIZE);
+	strcat(end, "Bye !");
 
 	q = users->quantity;
 	i = 0;
@@ -45,6 +98,10 @@ void		display_endgame(int *points, int ad_pipes[2][2], int u_pipes[MAX_USERS][2]
 
 		i++;
 	}
+
+	winners = get_winners(points, users);
+	strcat(buff, winners);
+	free(winners);
 
 	write(ad_pipes[FROMSERV][P_WRITE], buff, MSG_SIZE);
 	write(ad_pipes[FROMSERV][P_WRITE], end, MSG_SIZE);
@@ -154,7 +211,7 @@ int		gestpart(s_board board, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s
 			strncpy(buff, PLAY, MSG_SIZE);
 			write(u_pipes[i][FROMSERV][P_WRITE], buff, MSG_SIZE);
 			read(u_pipes[i][TOSERV][P_READ], buff, MSG_SIZE);
-			points[i] = atoi(buff);
+			points[i] += atoi(buff);
 
 			i++;
 		}

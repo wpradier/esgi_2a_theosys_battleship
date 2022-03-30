@@ -22,12 +22,16 @@ int		admin_connection_menu(int ns, int ad_pipes[2][2]) {
 				if (cli_msg[0] == 'y') {
 					strncpy(buff, VALID, MSG_SIZE);
 					write(ad_pipes[TOSERV][P_WRITE], buff, MSG_SIZE);
+					serv_send(ns, INFO, "Player's join request validated !\nWaiting for players to connect...\n");
+
 					break;
 				}
 
 				if (cli_msg[0] == 'n') {
 					strncpy(buff, INVALID, MSG_SIZE);
 					write(ad_pipes[TOSERV][P_WRITE], buff, MSG_SIZE);
+					serv_send(ns, INFO, "Player's join request denied.\nWaiting for players to connect...\n");
+
 					break;
 				}
 				serv_send(ns, INFO, "I did not understand your answer.\n");

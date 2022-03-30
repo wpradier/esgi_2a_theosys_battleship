@@ -35,7 +35,6 @@ int		player_menu(int ns, int pipes[2][2], s_board board) {
 
 	while (1) {
 		read(pipes[FROMSERV][P_READ], serv_msg, MSG_SIZE);
-		printf("SON: RECEIVED FROM SERV (1): %s\n", serv_msg);
 		if (!strncmp(serv_msg, DISPLAY, 2)) {
 			if (!serv_send(ns, INFO, serv_msg + 2))return 0;
 			continue;
@@ -50,7 +49,6 @@ int		player_menu(int ns, int pipes[2][2], s_board board) {
 	while (1) {
 		read(pipes[FROMSERV][P_READ], serv_msg, MSG_SIZE);
 
-		printf("SON: RECEIVED FROM SERV (2): %s\n", serv_msg);
 		if (!strncmp(serv_msg, END_GAME, 2)) {
 			if (!serv_send(ns, STOP_CONNECTION, serv_msg + 2))return (0);
 			break;
@@ -78,7 +76,7 @@ int		player_menu(int ns, int pipes[2][2], s_board board) {
 					continue;
 				}
 
-				points = strike(board, convert_i(cli_msg[0]), convert_i(cli_msg[0]));
+				points = strike(board, convert_i(cli_msg[0]), convert_i(cli_msg[2]));
 				snprintf(buff, MSG_SIZE, "%d", points);
 				write(pipes[TOSERV][P_WRITE], buff, MSG_SIZE);
 

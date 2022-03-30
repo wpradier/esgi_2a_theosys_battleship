@@ -8,7 +8,15 @@ int		validate_value_min(char c, char min) {
 	return (0);
 }
 
-int		initial_admin_menu(int admin_ns, int serv_fd) {
+int		parse_value_shm(char c) {
+	if (c >= 'a' && c <= 'f') {
+		return (c - 87);
+	}
+
+	return (c - 48); // is between '0' and '9'
+}
+
+int		initial_admin_menu(int admin_ns, int ad_pipes[2][2]) {
 	char	message[MSG_SIZE];
 	char	response[MSG_SIZE];
 	char	login[MAX_LOGIN_SIZE];
@@ -18,6 +26,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 	char	h;
 	char	x;
 	char	y;
+	s_board	board;
 
 
 	while (1) {
@@ -55,9 +64,22 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 
 	snprintf(message, MSG_SIZE, "01%c%c", w, h); // 01 = board_size
 
-	write(serv_fd, message, MSG_SIZE);
+	write(ad_pipes[TOSERV][P_WRITE], message, MSG_SIZE);
+
+	bzero(message, MSG_SIZE);
+
+	// wait for board shm's id
+	read(ad_pipes[FROMSERV][P_READ], message, MSG_SIZE);
+
+	board.shm_id = atoi(message);
+	board.width = parse_value_shm(w);
+	board.height = parse_value_shm(h);
+	board.len = board.width * board.height;
+	
 	while (1) {
+		usleep(5000); // 5ms
 		strncpy(message, "---ADMIN MENU---\n", MSG_SIZE);
+		strncat(message, get_board(board, 1), MSG_SIZE - 1);
 		strncat(message, "0: Quit menu and start waiting for players\n", MSG_SIZE - 1);
 		strncat(message, "1: Add player credentials\n", MSG_SIZE - 1);
 		strncat(message, "2: Add boat\n", MSG_SIZE - 1);
@@ -71,7 +93,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 
 		if (response[0] == '0') {
 			snprintf(message, MSG_SIZE, "00"); // end admin menu phase
-			write(serv_fd, message, MSG_SIZE);
+			write(ad_pipes[TOSERV][P_WRITE], message, MSG_SIZE);
 			return (1);
 		}
 		
@@ -97,7 +119,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 			strncat(message, ":", MSG_SIZE - 1);
 			strncat(message, password, MSG_SIZE - 1);
 
-			write(serv_fd, message, MSG_SIZE);
+			write(ad_pipes[TOSERV][P_WRITE], message, MSG_SIZE);
 
 			if (!serv_send(admin_ns, INFO, "User created!\n")) {
 				return (0);
@@ -133,7 +155,7 @@ int		initial_admin_menu(int admin_ns, int serv_fd) {
 
 			snprintf(message, MSG_SIZE, "03%c%c", x, y);
 
-			write(serv_fd, message, MSG_SIZE);
+			write(ad_pipes[TOSERV][P_WRITE], message, MSG_SIZE);
 
 			continue;
 		}

@@ -134,7 +134,7 @@ int			comserv() {
 	}
 
 	if (retfork == 0) {
-		initial_admin_menu(ns, ad_pipes[TOSERV][1]);
+		initial_admin_menu(ns, ad_pipes);
 		if (!serv_send(ns, INFO, "Admin phase over. Waiting for players to connect...\n")) {
 			return (0);
 		}
@@ -145,7 +145,7 @@ int			comserv() {
 		exit (EXIT_SUCCESS);
 	}
 
-	board = admin_phase(ad_pipes[TOSERV][0], users);
+	board = admin_phase(ad_pipes, users);
 
 	printf("---BOARD FINAL---\n%s", get_board(board, 1));
 	
