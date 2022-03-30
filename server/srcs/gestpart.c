@@ -71,7 +71,7 @@ char		*get_winners(int *points, s_users *users) {
 	return (buff);
 }
 
-void		display_endgame(int *points, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s_users *users) {
+void		display_endgame(int *points, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s_users *users, s_board board) {
 	int	i;
 	int	q;
 	char	buff[MSG_SIZE];
@@ -82,6 +82,7 @@ void		display_endgame(int *points, int ad_pipes[2][2], int u_pipes[MAX_USERS][2]
 
 	strncpy(buff, DISPLAY, MSG_SIZE);
 	strcat(buff, "---END OF GAME---\n");
+	strcat(buff, get_board(board, 0));
 
 	strncpy(end, END_GAME, MSG_SIZE);
 	strcat(end, "Bye !");
@@ -201,7 +202,7 @@ int		gestpart(s_board board, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s
 		while (i < q) {
 
 			if (detect_endgame(board)) {
-				display_endgame(points, ad_pipes, u_pipes, users);
+				display_endgame(points, ad_pipes, u_pipes, users, board);
 				return (1);
 			}
 			

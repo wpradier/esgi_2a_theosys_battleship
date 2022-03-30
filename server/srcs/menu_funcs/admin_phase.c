@@ -50,6 +50,7 @@ s_board		admin_phase(int ad_pipes[2][2], s_users *users) {
 					sizeof(char) * board.len,
 					IPC_CREAT|0700);
 
+			printf("shm id: %d\n", board.shm_id);
 			/* sending board id to admin */
 			sprintf(buff, "%d", board.shm_id);
 

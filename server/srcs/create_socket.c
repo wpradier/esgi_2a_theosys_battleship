@@ -1,7 +1,6 @@
 #include  "protoserv.h"
 #define ADDRESS "127.0.0.1"
 #define PORT 12345
-#define NBCLI 3
 
 
 int			create_socket() {
@@ -24,7 +23,7 @@ int			create_socket() {
 		return(0);
 	}
 
-	if ((listen(sd, NBCLI)) == -1) {
+	if ((listen(sd, MAX_USERS)) == -1) {
 		perror("Erreur listen");
 		return(0);
 	}

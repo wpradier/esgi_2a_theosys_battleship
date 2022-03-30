@@ -190,6 +190,7 @@ int			comserv() {
 	write(ad_pipes[FROMSERV][P_WRITE], buff, MSG_SIZE);
 	printf("---Entering gestpart---\n");
 	gestpart(board, ad_pipes, u_pipes, users);
+	shmctl(board.shm_id, IPC_RMID, NULL);
 
 	return (1);
 } 
