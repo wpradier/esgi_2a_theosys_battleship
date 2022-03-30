@@ -34,13 +34,20 @@
  * PIPE COMS PROTOCOL
  */
 
+
+// connexion
+# define END_CONN "00"
+# define CONN "01"
+# define VALID "02"
+# define INVALID "03"
+
 // admin
 # define END_PHASE "00"
 # define BOARD_SIZE "01"
 # define CREDENTIALS "02"
 # define BOAT_COORDS "03"
 
-//players
+// players
 # define END_GAME "00"
 # define START_GAME "01"
 # define DISPLAY "02"
@@ -86,6 +93,7 @@ s_board		admin_phase(int admin_fd, s_users *users);
 int		initial_admin_menu(int admin_ns, int serv_fd);
 int		player_menu(int ns, int pipes[2][2], s_board board);
 int		admin_menu(int ns, int pipes[2][2]);
+int		admin_connection_menu(int ns, int ad_pipes[2][2]);
 
 
 #endif

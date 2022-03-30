@@ -18,7 +18,9 @@ SRCS = srcs/main.c				\
        srcs/users_funcs/login_user.c		\
        srcs/menu_funcs/admin_phase.c		\
        srcs/menu_funcs/player_menu.c		\
+       srcs/menu_funcs/admin_menu.c		\
        srcs/menu_funcs/initial_admin_menu.c	\
+       srcs/menu_funcs/admin_connection_menu.c	\
 
 OBJS = $(SRCS:.c=.o)
 

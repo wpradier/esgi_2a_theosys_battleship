@@ -2,7 +2,7 @@
 
 void		display_srvMsg(char *str) {
 	printf("\033[0;31m");
-	printf("server: %s\n", strchr(str, ':') + 1);
+	printf("Server:\n%s\n", strchr(str, ':') + 1);
 	printf("\033[0m"); 
 }
 

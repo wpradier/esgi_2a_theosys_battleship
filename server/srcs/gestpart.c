@@ -10,6 +10,7 @@ int		detect_endgame(s_board board) {
 	shmpt = (char*)shmat((key_t)board.shm_id, 0, IPC_NOWAIT);
 
 	detect_boat = 0;
+	i = 0;
 	while (i < board.len) {
 		if (shmpt[i] == 'B') {
 			detect_boat = 1;
@@ -121,17 +122,23 @@ int		gestpart(s_board board, int ad_pipes[2][2], int u_pipes[MAX_USERS][2][2], s
 	int	*points;
 
 
-	points = malloc(sizeof(int) * users->quantity);
+	
 	q = users->quantity;
 	
+	points = malloc(sizeof(int) * q);
+	
 	strncpy(buff, START_GAME, MSG_SIZE);
+	printf("---starting game for admin---\n");
 	write(ad_pipes[FROMSERV][P_WRITE], buff, MSG_SIZE);
+	printf("---starting game for users---\n");
+	i = 0;
 	while (i < q) {
 		write(u_pipes[i][FROMSERV][P_WRITE], buff, MSG_SIZE);
 		points[i] = 0;
 		i++;
 	}
 
+	printf("---game started---\n");
 	while (1) {
 		i = 0;
 		while (i < q) {
