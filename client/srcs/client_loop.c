@@ -27,6 +27,10 @@ int		client_loop(int sd) {
 			return (0);
 		}
 
+		if (!strchr(srvMsg, ':')) {
+			continue;
+		}
+
 		display_srvMsg(srvMsg);
 
 		if (!strncmp(srvMsg, STOP_CONNECTION, 2)) {
